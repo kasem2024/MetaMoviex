@@ -35,7 +35,7 @@ function UserInfo({user, logout , setUser}: Props) {
         ) : (
           <Link
             href="/login"
-            className="px-3 py-1 bg-blue-600 rounded hover:bg-blue-700">
+            className="px-3 py-1 bg-zinc-700 rounded hover:bg-zinc-800">
             Login
           </Link>
         )}

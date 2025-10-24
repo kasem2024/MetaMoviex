@@ -1,5 +1,7 @@
 "use client";
 
+import { LogIn } from "lucide-react";
+
 export default function LoginButton() {
   const handleLogin = async () => {
     const res = await fetch("/api/auth/request-token");
@@ -11,5 +13,13 @@ export default function LoginButton() {
     }
   };
 
-  return <button onClick={handleLogin}>Login with TMDB</button>;
+  return (
+    <button
+      onClick={handleLogin}
+      className="flex items-center gap-2 bg-[#01b4e4] hover:bg-[#032541] text-white font-semibold px-6 py-3 rounded-full transition-colors shadow-lg hover:shadow-[#01b4e4]/40"
+    >
+      <LogIn size={18} />
+      Login with TMDB
+    </button>
+  );
 }

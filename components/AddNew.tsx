@@ -1,8 +1,10 @@
 import React from 'react'
-
+import { ImPlus } from "react-icons/im";
 function AddNew() {
   return (
-    <div>AddNew</div>
+    <div>
+      <ImPlus/>
+    </div>
   )
 }
 
