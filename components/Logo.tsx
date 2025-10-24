@@ -1,13 +1,14 @@
 import React from 'react'
-import meta from '@/public/assets/metamoviex.png'
+import logo from '@/public/assets/logoicon.png'
 import Image from 'next/image'
 import Link from 'next/link'
+import { LogInIcon } from 'lucide-react'
 function Logo() {
   return (
     <Link
      href={'/'} 
-    className='min-w-[200px] '>
-      <Image src={meta} alt="img" width={100} height={100} />
+    className='bg-black  rounded-2xl overflow-hidden mr-4 lg:mr-16 '>
+      <Image src={logo} alt="img" width={50} height={50} />
     </Link>
   )
 }

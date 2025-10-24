@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import LoginButton from "../../components/LoginButton";
+import Link from "next/link";
+import logo from '@/public/assets/logoicon.png'
 
 const Page = () => {
 
@@ -29,13 +31,11 @@ const Page = () => {
           transition={{ duration: 0.8 }}
           className="mb-6"
         >
-          <Image
-            src="/assets/metamoviex.png"
-            alt="MetaMoviex Logo"
-            width={120}
-            height={120}
-            className="drop-shadow-xl"
-          />
+            <Link
+          href={'/'} 
+          className='bg-red-600 p-[2px] rounded-2xl overflow-hidden'>
+            <Image src={logo} alt="img" width={50} height={50} />
+          </Link>
         </motion.div>
 
         {/* Title */}

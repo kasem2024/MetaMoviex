@@ -1,8 +1,9 @@
 'use client';
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useEffect } from "react";
-
+import logo from '@/public/assets/logoicon.png'
 export default function Footer() {
   // Example dynamic user (replace with your auth context / user session)
   const [username, setUsername] = useState<string | null>(null);
@@ -18,13 +19,11 @@ export default function Footer() {
         {/* Logo + Welcome */}
         <div>
           <div className="flex items-center gap-3 mb-4">
-            <Image
-              src="/assets/metamoviex.png"
-              alt="MetaMovieX Logo"
-              width={40}
-              height={40}
-              className="rounded-full"
-            />
+                <Link
+          href={'/'} 
+          className='bg-red-600 p-[2px] rounded-2xl overflow-hidden'>
+            <Image src={logo} alt="img" width={50} height={50} />
+          </Link>
             <h2 className="text-xl font-bold text-white">MetaMovieX</h2>
           </div>
           <p className="text-sm text-gray-400 leading-relaxed">

@@ -28,7 +28,7 @@ export default function CollapsibleList({ data }: CollapsibleListProps) {
             </span>
           </div>
           {/* List (appears on hover) */}
-          <ul className="max-h-0 opacity-0 z-100  text-white absolute overflow-hidden rounded-sm lg:rounded-md group-hover:max-h-48 group-hover:opacity-900 group-hover:bg-red-900 transition-all duration-300    text-zinc-200 ">
+          <ul className="max-h-0 opacity-0 z-100  text-white absolute overflow-hidden rounded-sm lg:rounded-md group-hover:max-h-48 group-hover:opacity-900 group-hover:bg-red-700 transition-all duration-300    text-zinc-200 ">
             {section.items?.map((item, i) => (
               <li key={i} className="py-1 hover:bg-white hover:text-black w-full px-6">
                 <Link href={item.src}>
