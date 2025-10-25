@@ -85,7 +85,8 @@ export default function SearchBar() {
                 >
                   {movie.poster_path ? (
                     <Image
-                    fill
+                      width={50}
+                      height={50}
                       src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`}
                       alt={movie.title}
                       className="w-6 h-6 object-cover rounded-full "
@@ -109,7 +110,8 @@ export default function SearchBar() {
                 >
                   {movie.poster_path ? (
                     <Image 
-                      fill
+                      width={50}
+                      height={50}
                       src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`}
                       alt={movie.title}
                       className="w-6 h-6 object-cover rounded-full "
