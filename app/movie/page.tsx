@@ -1,168 +1,9 @@
-// 'use client';
-
-// import { useEffect, useState } from 'react';
-// import Image from 'next/image';
-// import Link from 'next/link';
-
-// type Movie = {
-//   id: number;
-//   title: string;
-//   poster_path: string | null;
-//   release_date: string;
-// };
-
-// export default function PopularMovies() {
-//   const [movies, setMovies] = useState<Movie[]>([]);
-//   const [page, setPage] = useState(1);
-//   const [loading, setLoading] = useState(false);
-
-//   const fetchMovies = async (pageNum: number) => {
-//     setLoading(true);
-//     try {
-//       const res = await fetch(
-//         `https://api.themoviedb.org/3/movie/popular?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}&language=en-US&page=${pageNum}`
-//       );
-//       const data = await res.json();
-//       if (pageNum === 1) {
-//         setMovies(data.results || []);
-//       } else {
-//         setMovies((prev) => [...prev, ...(data.results || [])]);
-//       }
-//     } catch (err) {
-//       console.error(err);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchMovies(page);
-//   }, [page]);
-
-//   return (
-//     <div className="w-full min-h-screen bg-zinc-950 text-white pt-[50px] lg:pt-[40px]">
-     
-
-//       <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-4 gap-10">
-//         {/* Sidebar Filters */}
-//         <aside className="bg-zinc-900 p-5 rounded-2xl border border-zinc-800 h-fit">
-//           <h2 className="text-2xl font-semibold mb-6">🎬 Popular Movies</h2>
-
-//           <div className="space-y-5 text-sm">
-//             <div>
-//               <h3 className="font-semibold text-gray-300 mb-2">Sort</h3>
-//               <select className="bg-zinc-800 text-white w-full rounded-md p-2 border border-zinc-700">
-//                 <option>Popularity Descending</option>
-//                 <option>Popularity Ascending</option>
-//                 <option>Release Date Descending</option>
-//                 <option>Release Date Ascending</option>
-//               </select>
-//             </div>
-
-//             <div>
-//               <h3 className="font-semibold text-gray-300 mb-2">Country</h3>
-//               <select className="bg-zinc-800 text-white w-full rounded-md p-2 border border-zinc-700">
-//                 <option>Egypt</option>
-//                 <option>USA</option>
-//                 <option>UK</option>
-//                 <option>Japan</option>
-//               </select>
-//             </div>
-
-//             <div>
-//               <h3 className="font-semibold text-gray-300 mb-2">Genres</h3>
-//               <div className="flex flex-wrap gap-2">
-//                 {[
-//                   'Action',
-//                   'Comedy',
-//                   'Drama',
-//                   'Horror',
-//                   'Romance',
-//                   'Sci-Fi',
-//                   'Animation',
-//                 ].map((g) => (
-//                   <span
-//                     key={g}
-//                     className="bg-zinc-800 px-3 py-1 rounded-full cursor-pointer hover:bg-red-600 transition"
-//                   >
-//                     {g}
-//                   </span>
-//                 ))}
-//               </div>
-//             </div>
-
-//             <button className="w-full mt-6 bg-red-600 hover:bg-red-700 py-2 rounded-md transition font-semibold">
-//               Search
-//             </button>
-//           </div>
-//         </aside>
-
-//         {/* Main Content */}
-//         <main className="md:col-span-3">
-//           <h2 className="text-3xl font-bold mb-6">Popular Movies</h2>
-
-//           {loading && page === 1 ? (
-//             <div className="text-center py-20 text-gray-400">Loading movies...</div>
-//           ) : (
-//             <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-//               {movies.map((movie) => (
-//                 <Link 
-//                   href={`/movie/${movie.id}`}
-//                   key={movie.id}
-//                   className="bg-zinc-900 rounded-2xl overflow-hidden shadow hover:scale-[1.03] transition-transform cursor-pointer"
-//                 >
-//                   {movie.poster_path ? (
-//                     <Image
-//                       src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-//                       alt={movie.title}
-//                       width={500}
-//                       height={750}
-//                       className="w-full h-[300px] object-cover"
-//                     />
-//                   ) : (
-//                     <div className="w-full h-[300px] bg-zinc-800 flex items-center justify-center text-gray-500">
-//                       No Image
-//                     </div>
-//                   )}
-
-//                   <div className="p-4">
-//                     <h3 className="font-semibold line-clamp-1">{movie.title}</h3>
-//                     <p className="text-gray-400 text-sm">
-//                       {movie.release_date
-//                         ? new Date(movie.release_date).toLocaleDateString('en-US', {
-//                             month: 'short',
-//                             day: 'numeric',
-//                             year: 'numeric',
-//                           })
-//                         : 'N/A'}
-//                     </p>
-//                   </div>
-//                 </Link>
-//               ))}
-//             </div>
-//           )}
-
-//           {/* Load More */}
-//           <div className="flex justify-center mt-10">
-//             <button
-//               onClick={() => setPage((prev) => prev + 1)}
-//               disabled={loading}
-//               className="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-sm rounded-full transition disabled:opacity-50 disabled:cursor-not-allowed"
-//             >
-//               {loading ? 'Loading...' : 'Load More'}
-//             </button>
-//           </div>
-//         </main>
-//       </div>
-//     </div>
-//   );
-// }
 
 'use client';
-
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+
 
 const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
 
@@ -202,7 +43,7 @@ export default function DiscoverMovies() {
   }, []);
 
   // --- Fetch movies based on filters
-  const fetchMovies = async (pageNum: number, append = false) => {
+  const fetchMovies = useCallback(async (pageNum: number, append = false) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
@@ -233,12 +74,12 @@ export default function DiscoverMovies() {
     } finally {
       setLoading(false);
     }
-  };
+  },[sortBy , selectedGenres , minScore , minVotes , language , releaseFrom , releaseTo , keywords])
 
   useEffect(() => {
     fetchMovies(page);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchMovies]);
 
   const handleSearch = () => {
     setPage(1);

@@ -1,5 +1,5 @@
 import React from 'react'
-import AddNew from './AddNew'
+
 
 import UserInfo from './UserInfo'
 import SearchBar from './SearchBar'

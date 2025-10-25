@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { Trophy, Star } from "lucide-react";
+import { Trophy } from "lucide-react";
 
 type Contributor = {
   id: number;

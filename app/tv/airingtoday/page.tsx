@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -44,7 +44,7 @@ export default function AiringToday() {
   }, []);
 
   // Fetch shows airing today
-  const fetchTvShows = async (pageNum: number, append = false) => {
+  const fetchTvShows = useCallback( async (pageNum: number, append = false) => {
     setLoading(true);
     try {
       const today = new Date().toISOString().split('T')[0]; // today’s date
@@ -76,11 +76,11 @@ export default function AiringToday() {
     } finally {
       setLoading(false);
     }
-  };
+  },[sortBy  , minVotes , minScore , selectedGenres , language , country , keywords])
 
   useEffect(() => {
     fetchTvShows(1);
-  }, []);
+  }, [fetchTvShows]);
 
   const toggleGenre = (id: number) => {
     setSelectedGenres((prev) =>

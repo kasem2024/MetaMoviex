@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { PlayCircle } from "lucide-react";
 
+// --- TMDB TYPES ---
 type Movie = {
   id: number;
   title: string;
@@ -11,50 +12,93 @@ type Movie = {
   release_date: string;
 };
 
+type TmdbVideo = {
+  id: string;
+  key: string;
+  name: string;
+  site: string;
+  type: string;
+};
+
+type TmdbVideoResponse = {
+  id: number;
+  results: TmdbVideo[];
+};
+
+// --- CATEGORY OPTIONS ---
 const categories = [
   { key: "popular", label: "Popular" },
   { key: "now_playing", label: "In Theaters" },
   { key: "top_rated", label: "Top Rated" },
   { key: "upcoming", label: "Coming Soon" },
-];
+] as const;
 
 export default function Discover() {
-  const [category, setCategory] = useState("popular");
+  // --- STATE ---
+  const [category, setCategory] = useState<(typeof categories)[number]["key"]>("popular");
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
-const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
-const fetchTrailer = async (movieId: number) => {
-  const res = await fetch(
-    `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}&language=en-US`
-  );
-  const data = await res.json();
-  const trailer = data.results.find((v: any) => v.type === "Trailer" && v.site === "YouTube");
-  return trailer ? trailer.key : null;
-};
-const handlePlay = async (movieId: number) => {
-  const key = await fetchTrailer(movieId);
-  if (key) {
-    setTrailerKey(key);
-    setShowModal(true);
-  }
-};
-
-  // Fetch movies by category
-  useEffect(() => {
-    const fetchMovies = async () => {
-      setLoading(true);
+  // --- FETCH TRAILER ---
+  const fetchTrailer = async (movieId: number): Promise<string | null> => {
+    try {
       const res = await fetch(
-        `https://api.themoviedb.org/3/movie/${category}?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}&language=en-US&page=1`
+        `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}&language=en-US`
       );
-      const data = await res.json();
-      setMovies(data.results || []);
-      setLoading(false);
+
+      if (!res.ok) {
+        console.error("Failed to fetch trailer");
+        return null;
+      }
+
+      const data: TmdbVideoResponse = await res.json();
+      const trailer = data.results.find(
+        (v) => v.type === "Trailer" && v.site === "YouTube"
+      );
+
+      return trailer ? trailer.key : null;
+    } catch (err) {
+      console.error("Error fetching trailer:", err);
+      return null;
+    }
+  };
+
+  // --- HANDLE PLAY ---
+  const handlePlay = async (movieId: number): Promise<void> => {
+    const key = await fetchTrailer(movieId);
+    if (key) {
+      setTrailerKey(key);
+      setShowModal(true);
+    }
+  };
+
+  // --- FETCH MOVIES ---
+  useEffect(() => {
+    const fetchMovies = async (): Promise<void> => {
+      try {
+        setLoading(true);
+        const res = await fetch(
+          `https://api.themoviedb.org/3/movie/${category}?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}&language=en-US&page=1`
+        );
+
+        if (!res.ok) throw new Error("Failed to fetch movies");
+
+        const data: { results: Movie[] } = await res.json();
+        setMovies(data.results || []);
+      } catch (err) {
+        console.error("Error fetching movies:", err);
+        setMovies([]);
+      } finally {
+        setLoading(false);
+      }
     };
+
     fetchMovies();
   }, [category]);
 
+  // --- UI ---
   return (
     <section className="w-full bg-zinc-950 text-white py-12">
       {/* Header */}
@@ -108,9 +152,9 @@ const handlePlay = async (movieId: number) => {
               {/* Play Button on Hover */}
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                 <PlayCircle
-  className="w-12 h-12 text-white hover:text-red-500 transition"
-  onClick={() => handlePlay(movie.id)}
-/>
+                  className="w-12 h-12 text-white hover:text-red-500 transition"
+                  onClick={() => handlePlay(movie.id)}
+                />
               </div>
 
               <div className="p-3">
@@ -129,24 +173,25 @@ const handlePlay = async (movieId: number) => {
           ))
         )}
       </div>
-      {showModal && trailerKey && (
-  <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-    <div className="relative w-[90%] max-w-3xl aspect-video">
-      <iframe
-        src={`https://www.youtube.com/embed/${trailerKey}`}
-        className="w-full h-full rounded-lg"
-        allowFullScreen
-      ></iframe>
-      <button
-        onClick={() => setShowModal(false)}
-        className="absolute -top-10 right-0 text-white text-xl font-bold"
-      >
-        ✕
-      </button>
-    </div>
-  </div>
-)}
 
+      {/* Trailer Modal */}
+      {showModal && trailerKey && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+          <div className="relative w-[90%] max-w-3xl aspect-video">
+            <iframe
+              src={`https://www.youtube.com/embed/${trailerKey}`}
+              className="w-full h-full rounded-lg"
+              allowFullScreen
+            ></iframe>
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute -top-10 right-0 text-white text-xl font-bold"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

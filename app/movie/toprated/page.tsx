@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -42,7 +42,7 @@ export default function TopRatedMovies() {
   }, []);
 
   // Fetch movies
-  const fetchMovies = async (pageNum: number, append = false) => {
+  const fetchMovies = useCallback( async (pageNum: number, append = false) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
@@ -68,11 +68,11 @@ export default function TopRatedMovies() {
     } finally {
       setLoading(false);
     }
-  };
+  },[minScore , minVotes , sortBy , selectedGenres , language , keywords])
 
   useEffect(() => {
     fetchMovies(1);
-  }, []);
+  }, [fetchMovies ]);
 
   const toggleGenre = (id: number) => {
     setSelectedGenres((prev) =>

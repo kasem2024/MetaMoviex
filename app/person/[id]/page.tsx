@@ -3,30 +3,71 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
-if (!TMDB_API_KEY) console.warn("NEXT_PUBLIC_TMDB_API_KEY missing.");
+// --- Types from TMDB ---
+interface TmdbPerson {
+  id: number;
+  name: string;
+  biography: string;
+  birthday: string | null;
+  deathday: string | null;
+  known_for_department: string | null;
+  place_of_birth: string | null;
+  gender: number;
+  profile_path: string | null;
+  also_known_as: string[];
+}
 
-async function tmdbFetch(path: string, params: Record<string, string | number | boolean> = {}) {
+interface TmdbCreditItem {
+  id: number;
+  title?: string;
+  name?: string;
+  media_type: "movie" | "tv";
+  popularity: number;
+  poster_path?: string | null;
+  character?: string | null;
+  release_date?: string | null;
+  first_air_date?: string | null;
+}
+
+interface TmdbCombinedCredits {
+  cast: TmdbCreditItem[];
+  crew: TmdbCreditItem[];
+}
+
+// --- Fetch Utility ---
+const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+if (!TMDB_API_KEY) console.warn("⚠️ NEXT_PUBLIC_TMDB_API_KEY missing.");
+
+async function tmdbFetch<T>(path: string, params: Record<string, string | number | boolean> = {}): Promise<T> {
   const url = new URL(`https://api.themoviedb.org/3${path}`);
   url.searchParams.set("api_key", String(TMDB_API_KEY));
   url.searchParams.set("language", "en-US");
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v));
+
   const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
-  if (!res.ok) throw new Error(`TMDB fetch failed: ${res.status}`);
-  return res.json();
+  if (!res.ok) throw new Error(`TMDB fetch failed: ${res.status} ${res.statusText}`);
+  return res.json() as Promise<T>;
 }
 
-function formatDate(date?: string) {
-  return date ? new Date(date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "-";
+// --- Helpers ---
+function formatDate(date?: string | null) {
+  return date
+    ? new Date(date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "-";
 }
 
+// --- Main Page ---
 export default async function PersonPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   try {
     const [details, credits] = await Promise.all([
-      tmdbFetch(`/person/${id}`),
-      tmdbFetch(`/person/${id}/combined_credits`),
+      tmdbFetch<TmdbPerson>(`/person/${id}`),
+      tmdbFetch<TmdbCombinedCredits>(`/person/${id}/combined_credits`),
     ]);
 
     const base = "https://image.tmdb.org/t/p/original";
@@ -38,16 +79,17 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
     const alsoKnownAs = details.also_known_as?.length ? details.also_known_as.join(", ") : "-";
     const contentScore = Math.min(100, Math.floor(Math.random() * 20) + 80); // playful fake score
 
-    // Sort all combined credits by year (descending)
+    // Sort credits by year (descending)
     const allCredits = [...(credits.cast || []), ...(credits.crew || [])].sort((a, b) => {
       const dateA = new Date(a.release_date || a.first_air_date || "1900").getTime();
       const dateB = new Date(b.release_date || b.first_air_date || "1900").getTime();
       return dateB - dateA;
     });
 
+    // Most popular "Known For"
     const knownFor = credits.cast
-      ?.filter((c: any) => c.poster_path)
-      ?.sort((a: any, b: any) => b.popularity - a.popularity)
+      ?.filter((c) => c.poster_path)
+      ?.sort((a, b) => b.popularity - a.popularity)
       ?.slice(0, 12);
 
     return (
@@ -90,32 +132,14 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
                 <p className="text-gray-400 text-lg mb-4">{details.known_for_department}</p>
               )}
 
-              {/* Personal Info Grid */}
+              {/* Personal Info */}
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-gray-300 max-w-xl">
-                <div>
-                  <span className="block font-semibold text-gray-200">Known For</span>
-                  {knownForDept}
-                </div>
-                <div>
-                  <span className="block font-semibold text-gray-200">Known Credits</span>
-                  {knownCredits}
-                </div>
-                <div>
-                  <span className="block font-semibold text-gray-200">Gender</span>
-                  {genderLabel}
-                </div>
-                <div>
-                  <span className="block font-semibold text-gray-200">Birthday</span>
-                  {formatDate(details.birthday)}
-                </div>
-                <div>
-                  <span className="block font-semibold text-gray-200">Place of Birth</span>
-                  {details.place_of_birth || "-"}
-                </div>
-                <div>
-                  <span className="block font-semibold text-gray-200">Also Known As</span>
-                  {alsoKnownAs}
-                </div>
+                <Info label="Known For" value={knownForDept} />
+                <Info label="Known Credits" value={String(knownCredits)} />
+                <Info label="Gender" value={genderLabel} />
+                <Info label="Birthday" value={formatDate(details.birthday)} />
+                <Info label="Place of Birth" value={details.place_of_birth || "-"} />
+                <Info label="Also Known As" value={alsoKnownAs} />
               </div>
 
               {/* Content Score */}
@@ -138,21 +162,21 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
         </div>
 
         {/* Biography */}
-        <div className="max-w-6xl mx-auto px-4 py-10">
-          <h2 className="text-2xl font-semibold border-b border-gray-700 pb-2 mb-4">Biography</h2>
+        <Section title="Biography">
           {details.biography ? (
             <p className="text-gray-300 leading-relaxed whitespace-pre-line">{details.biography}</p>
           ) : (
-            <p className="text-gray-500 italic">We don't have a biography for {details.name}.</p>
+            <p className="text-gray-500 italic">
+              We don&apos;t have a biography for {details.name}.
+            </p>
           )}
-        </div>
+        </Section>
 
         {/* Known For */}
         {knownFor?.length > 0 && (
-          <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-2xl font-semibold border-b border-gray-700 pb-2 mb-4">Known For</h2>
+          <Section title="Known For">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-              {knownFor.map((item: any) => (
+              {knownFor.map((item) => (
                 <Link
                   key={item.id}
                   href={item.media_type === "movie" ? `/movie/${item.id}` : `/tv/${item.id}`}
@@ -161,7 +185,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
                   <div className="aspect-[2/3] relative">
                     <Image
                       src={`${base}${item.poster_path}`}
-                      alt={item.title || item.name}
+                      alt={item.title || item.name || ""}
                       fill
                       style={{ objectFit: "cover" }}
                     />
@@ -177,15 +201,14 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
                 </Link>
               ))}
             </div>
-          </div>
+          </Section>
         )}
 
         {/* Filmography */}
-        <div className="max-w-6xl mx-auto px-4 py-10">
-          <h2 className="text-2xl font-semibold border-b border-gray-700 pb-2 mb-4">Acting Credits</h2>
+        <Section title="Acting Credits">
           {allCredits.length > 0 ? (
             <ul className="divide-y divide-gray-800 text-sm">
-              {allCredits.map((c: any, i: number) => (
+              {allCredits.map((c, i) => (
                 <li key={i} className="flex items-start justify-between py-2">
                   <div className="flex-1">
                     <Link
@@ -194,9 +217,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
                     >
                       {c.title || c.name}
                     </Link>
-                    {c.character && (
-                      <span className="text-gray-400"> as {c.character}</span>
-                    )}
+                    {c.character && <span className="text-gray-400"> as {c.character}</span>}
                   </div>
                   <div className="text-gray-500 text-xs w-16 text-right">
                     {(c.release_date || c.first_air_date || "").slice(0, 4)}
@@ -207,7 +228,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
           ) : (
             <p className="text-gray-500">No credits found.</p>
           )}
-        </div>
+        </Section>
 
         <footer className="py-8 text-center text-gray-500 text-sm border-t border-gray-800">
           Data provided by TMDB • Built with ❤️ by MetaMoviex
@@ -218,4 +239,23 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
     console.error(err);
     notFound();
   }
+}
+
+// --- Reusable UI Helpers ---
+function Info({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <span className="block font-semibold text-gray-200">{label}</span>
+      {value}
+    </div>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-10">
+      <h2 className="text-2xl font-semibold border-b border-gray-700 pb-2 mb-4">{title}</h2>
+      {children}
+    </div>
+  );
 }

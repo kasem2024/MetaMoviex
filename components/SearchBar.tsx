@@ -2,6 +2,7 @@
 import { FaSearch } from "react-icons/fa";
 import { useState, useEffect } from 'react';
 import Link from "next/link";
+import Image from "next/image";
 
 type Movie = {
   id: number;
@@ -83,7 +84,8 @@ export default function SearchBar() {
                   className="flex p-2 item-center gap-3 py-1 lg:pl-[400px] text-sm hover:bg-red-900 cursor-pointer transition  border-b-[1px] border-gray-600"
                 >
                   {movie.poster_path ? (
-                    <img
+                    <Image
+                    fill
                       src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`}
                       alt={movie.title}
                       className="w-6 h-6 object-cover rounded-full "
@@ -106,7 +108,8 @@ export default function SearchBar() {
                   className="flex p-2 item-center gap-3 py-1 lg:pl-[400px] text-sm hover:bg-red-900 cursor-pointer transition  border-b-[1px] border-gray-600"
                 >
                   {movie.poster_path ? (
-                    <img
+                    <Image 
+                      fill
                       src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`}
                       alt={movie.title}
                       className="w-6 h-6 object-cover rounded-full "

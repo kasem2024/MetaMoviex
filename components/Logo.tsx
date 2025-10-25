@@ -2,7 +2,7 @@ import React from 'react'
 import logo from '@/public/assets/logoicon.png'
 import Image from 'next/image'
 import Link from 'next/link'
-import { LogInIcon } from 'lucide-react'
+
 function Logo() {
   return (
     <Link

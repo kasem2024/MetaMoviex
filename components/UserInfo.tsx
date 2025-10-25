@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import React from 'react';
 import { User } from '@/types';
+import Image from 'next/image';
 
 
 interface Props {
@@ -9,9 +10,7 @@ interface Props {
     setUser:(user:User | null)=>void
 }
 
-function UserInfo({user, logout , setUser}: Props) {
-
-  
+function UserInfo({user, logout }: Props) {
 
     return (
       <div>
@@ -19,7 +18,8 @@ function UserInfo({user, logout , setUser}: Props) {
           <div className="flex items-center gap-3">
             <span>Hello, {user.username}</span>
             {user.avatar?.tmdb?.avatar_path && (
-              <img
+              <Image 
+                fill
                 src={`https://image.tmdb.org/t/p/w45${user.avatar.tmdb.avatar_path}`}
                 alt="avatar"
                 className="w-8 h-8 rounded-full"

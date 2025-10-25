@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -43,46 +43,44 @@ export default function NowPlayingMovies() {
   }, []);
 
   // Fetch movies
-  const fetchMovies = async (pageNum: number, append = false) => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        api_key: String(TMDB_API_KEY),
-        language: 'en-US',
-        page: String(pageNum),
-        region: 'US',
-        sort_by: sortBy,
-        include_adult: 'false',
-        'vote_average.gte': String(minScore),
-        'vote_count.gte': String(minVotes),
-      });
+ const fetchMovies = useCallback(async (pageNum: number, append = false) => {
+  setLoading(true);
+  try {
+    const params = new URLSearchParams({
+      api_key: String(TMDB_API_KEY),
+      language: "en-US",
+      page: String(pageNum),
+      region: "US",
+      sort_by: sortBy,
+      include_adult: "false",
+      "vote_average.gte": String(minScore),
+      "vote_count.gte": String(minVotes),
+    });
 
-      // Apply filters
-      if (selectedGenres.length) params.set('with_genres', selectedGenres.join(','));
-      if (language) params.set('with_original_language', language);
-      if (keywords) params.set('with_keywords', keywords);
-      if (startDate) params.set('primary_release_date.gte', startDate);
-      if (endDate) params.set('primary_release_date.lte', endDate);
+    if (selectedGenres.length) params.set("with_genres", selectedGenres.join(","));
+    if (language) params.set("with_original_language", language);
+    if (keywords) params.set("with_keywords", keywords);
+    if (startDate) params.set("primary_release_date.gte", startDate);
+    if (endDate) params.set("primary_release_date.lte", endDate);
 
-      // Filter to current now playing range
-      const today = new Date().toISOString().split('T')[0];
-      params.set('primary_release_date.lte', today);
+    const today = new Date().toISOString().split("T")[0];
+    params.set("primary_release_date.lte", today);
 
-      const res = await fetch(`https://api.themoviedb.org/3/discover/movie?${params.toString()}`);
-      const data = await res.json();
+    const res = await fetch(`https://api.themoviedb.org/3/discover/movie?${params.toString()}`);
+    const data = await res.json();
 
-      if (append) setMovies((prev) => [...prev, ...(data.results || [])]);
-      else setMovies(data.results || []);
-    } catch (error) {
-      console.error('Error fetching now playing movies:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    if (append) setMovies((prev) => [...prev, ...(data.results || [])]);
+    else setMovies(data.results || []);
+  } catch (error) {
+    console.error("Error fetching now playing movies:", error);
+  } finally {
+    setLoading(false);
+  }
+}, [sortBy, selectedGenres, language, keywords, startDate, endDate, minScore, minVotes]);
 
   useEffect(() => {
     fetchMovies(1);
-  }, []);
+  }, [fetchMovies]);
 
   const toggleGenre = (id: number) => {
     setSelectedGenres((prev) =>

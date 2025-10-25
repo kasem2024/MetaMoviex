@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -41,7 +41,7 @@ export default function UpcomingMovies() {
   }, []);
 
   // Fetch movies based on filters
-  const fetchMovies = async (pageNum: number, append = false) => {
+  const fetchMovies = useCallback( async (pageNum: number, append = false) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
@@ -69,12 +69,12 @@ export default function UpcomingMovies() {
     } finally {
       setLoading(false);
     }
-  };
+  },[sortBy , releaseFrom , releaseTo , selectedGenres , minScore , minVotes , language , keywords])
 
   useEffect(() => {
     fetchMovies(page);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchMovies]);
 
   const toggleGenre = (id: number) => {
     setSelectedGenres((prev) =>

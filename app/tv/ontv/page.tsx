@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -46,7 +46,7 @@ export default function OnTheAir() {
   }, []);
 
   // Fetch On The Air TV shows
-  const fetchTvShows = async (pageNum: number, append = false) => {
+  const fetchTvShows = useCallback(async (pageNum: number, append = false) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
@@ -76,11 +76,11 @@ export default function OnTheAir() {
     } finally {
       setLoading(false);
     }
-  };
+  },[selectedGenres , language , country , keywords , startDate , endDate ,minScore , minVotes , sortBy])
 
   useEffect(() => {
     fetchTvShows(1);
-  }, []);
+  }, [fetchTvShows]);
 
   const toggleGenre = (id: number) => {
     setSelectedGenres((prev) =>
