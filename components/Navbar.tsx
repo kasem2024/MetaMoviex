@@ -18,7 +18,5 @@ export default function Navbar() {
          <UserControl/>
       </div>
     </nav>
-        
-
   );
 }

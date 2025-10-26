@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function HeroSection() {
   return (
-    <div className="relative w-full h-[500px] md:h-[600px] flex items-center justify-center text-white overflow-hidden">
+    <div className="mt-[50px] relative w-full h-[500px] md:h-[600px] flex items-center justify-center text-white overflow-hidden">
       <div className="absolute inset-0">
         <Image
           src="https://image.tmdb.org/t/p/original/8YFL5QQVPy3AgrEQxNYVSgiPEbe.jpg" // Replace with any TMDB or custom image
@@ -16,6 +16,7 @@ export default function HeroSection() {
           sizes="100vw"
           className="object-cover object-center brightness-75"
         />
+
       </div>
 
       {/* Gradient Overlay for readability */}
